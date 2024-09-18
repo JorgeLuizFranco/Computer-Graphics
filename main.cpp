@@ -296,16 +296,16 @@ int main() {
     glLinkProgram(shaderProgram);
 
     // Create objects
-    Object star0(shaderProgram, starData, -0.05f, 0.80f, 0.00f, 0.16f);
-    Object star1(shaderProgram, starData, -0.31f, 0.37f, 0.00f, 0.11f);
-    Object bush0(shaderProgram, bushData, -0.79, -0.74, 0.00, 0.14);
-    Object bush1(shaderProgram, bushData, 0.26, -0.86, 0.00, 0.13);
-    Object bush2(shaderProgram, bushData, 0.70, -0.40, 0.00, 0.12);
+    Object star0(shaderProgram, starData, -0.05f, 0.80f, 0.00f, 0.16f, 2);
+    Object star1(shaderProgram, starData, -0.31f, 0.37f, 0.00f, 0.11f, 2);
+    Object bush0(shaderProgram, bushData, -0.79, -0.74, 0.00, 0.14, 2);
+    Object bush1(shaderProgram, bushData, 0.26, -0.86, 0.00, 0.13, 2);
+    Object bush2(shaderProgram, bushData, 0.70, -0.40, 0.00, 0.12, 2);
     Object house(shaderProgram, houseData, -0.05f, -0.28f, 0.00f, 0.81f);
     Object ship(shaderProgram, shipData, 0.60, 0.53, 0.00, 0.26);
-    Object cloud0(shaderProgram, cloudData, -0.42f, 0.71f, 0.0f, 0.31f);
-    Object cloud1(shaderProgram, cloudData, -0.80f, 0.41f, 0.00f, 0.31f);
-    Object cloud2(shaderProgram, cloudData, 0.21f, 0.50f, 0.00f, 0.31f);
+    Object cloud0(shaderProgram, cloudData, -0.42f, 0.71f, 0.0f, 0.31f, 2);
+    Object cloud1(shaderProgram, cloudData, -0.80f, 0.41f, 0.00f, 0.31f, 2);
+    Object cloud2(shaderProgram, cloudData, 0.21f, 0.50f, 0.00f, 0.31f, 2);
     Object background(shaderProgram, backgroundData, 0.0f, 0.0f, 0.99f);
 
     bool mesh_active = false;

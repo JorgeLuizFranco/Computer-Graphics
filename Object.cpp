@@ -6,9 +6,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-Object::Object(GLuint shaderProgram, vData data, float _xPos, float _yPos, float _zPos, float _scale) 
+Object::Object(GLuint shaderProgram, vData data, float _xPos, float _yPos, float _zPos, float _scale, int axis) 
     : shaderProgram(shaderProgram), angle(0.0f), data(data) {
 
+    this->axis = axis;
     xPos = _xPos;
     yPos = _yPos;
     zPos = _zPos;
@@ -37,7 +38,7 @@ Object::Object(GLuint shaderProgram, vData data, float _xPos, float _yPos, float
 
     }
 
-void Object::Draw(bool mesh_active, int axis) {
+void Object::Draw(bool mesh_active) {
     glBindVertexArray(vao);
     glUseProgram(shaderProgram);
 
