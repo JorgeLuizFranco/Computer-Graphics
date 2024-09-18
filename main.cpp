@@ -1,6 +1,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <vector>
 #include "Object.h"
 
 // Shaders
@@ -14,7 +15,7 @@ const GLchar* vertexSource = R"glsl(
     void main()
     {
         Color = color;
-        gl_Position = transform*vec4(position, 0.0, 1.0);
+        gl_Position = transform * vec4(position, 0.0, 1.0);
     }
 )glsl";
 
@@ -28,27 +29,29 @@ const GLchar* fragmentSource = R"glsl(
     }
 )glsl";
 
+// Star Data
 GLfloat star_vertices[] = {
-        // Position          // Color
-        0.0f ,  + 0.5f,  1.0f, 1.0f, 0.0f, // Top
-         + 0.2f,  + 0.2f, 1.0f, 1.0f, 0.0f, // Inner top-right
-         + 0.5f, 0.0f,  1.0f, 1.0f, 0.0f, // Right
-         + 0.2f,  - 0.2f, 1.0f, 1.0f, 0.0f, // Inner bottom-right
-        0.0f ,  - 0.5f,  1.0f, 1.0f, 0.0f, // Bottom
-         - 0.2f,  - 0.2f, 1.0f, 1.0f, 0.0f, // Inner bottom-left
-         - 0.5f, 0.0f ,  1.0f, 1.0f, 0.0f, // Left
-         - 0.2f,  + 0.2f, 1.0f, 1.0f, 0.0f  // Inner top-left
-    };
+    // Position          // Color
+    0.0f,  +0.5f, 1.0f, 1.0f, 0.0f, // Top
+     +0.2f,  +0.2f, 1.0f, 1.0f, 0.0f, // Inner top-right
+     +0.5f, 0.0f,  1.0f, 1.0f, 0.0f, // Right
+     +0.2f,  -0.2f, 1.0f, 1.0f, 0.0f, // Inner bottom-right
+    0.0f,  -0.5f,  1.0f, 1.0f, 0.0f, // Bottom
+     -0.2f,  -0.2f, 1.0f, 1.0f, 0.0f, // Inner bottom-left
+     -0.5f, 0.0f,  1.0f, 1.0f, 0.0f, // Left
+     -0.2f,  +0.2f, 1.0f, 1.0f, 0.0f  // Inner top-left
+};
 GLuint star_elements[] = {
-        0, 1, 3,
-        1, 2, 3,
-        0, 3, 4,
-        0, 4, 5,
-        5, 6, 7,
-        0, 5, 7
+    0, 1, 3,
+    1, 2, 3,
+    0, 3, 4,
+    0, 4, 5,
+    5, 6, 7,
+    0, 5, 7
 };
 vData starData{star_vertices, star_elements, sizeof(star_vertices), sizeof(star_elements)};
 
+// Bush Data
 GLfloat bush_vertices[] = {
     0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
     0.93f, 0.25f, 0.0f, 1.0f, 0.0f,
@@ -78,6 +81,39 @@ GLuint bush_elements[] = {
     0, 4, 2,
 };
 vData bushData{bush_vertices, bush_elements, sizeof(bush_vertices), sizeof(bush_elements)};
+
+// Moon Data
+const int moon_segments = 36; // Number of segments for the circle
+GLfloat moon_vertices[moon_segments * 5 + 5]; // +5 for the center vertex
+GLuint moon_elements[moon_segments * 3];
+
+void createMoonData() {
+    // Center vertex
+    moon_vertices[0] = 0.0f;
+    moon_vertices[1] = 0.0f;
+    moon_vertices[2] = 0.8f; // Gray color
+    moon_vertices[3] = 0.8f;
+    moon_vertices[4] = 0.8f;
+
+    // Circle vertices
+    float angleStep = 2.0f * M_PI / moon_segments;
+    for (int i = 0; i < moon_segments; ++i) {
+        float angle = i * angleStep;
+        moon_vertices[(i + 1) * 5] = 0.5f * cos(angle);
+        moon_vertices[(i + 1) * 5 + 1] = 0.5f * sin(angle);
+        moon_vertices[(i + 1) * 5 + 2] = 0.8f; // Gray color
+        moon_vertices[(i + 1) * 5 + 3] = 0.8f;
+        moon_vertices[(i + 1) * 5 + 4] = 0.8f;
+    }
+
+    // Circle elements (fan)
+    for (int i = 0; i < moon_segments; ++i) {
+        moon_elements[i * 3] = 0;
+        moon_elements[i * 3 + 1] = i + 1;
+        moon_elements[i * 3 + 2] = (i + 1) % moon_segments + 1;
+    }
+}
+vData moonData{moon_vertices, moon_elements, sizeof(moon_vertices), sizeof(moon_elements)};
 
 int main() {
     glfwInit();
@@ -113,46 +149,66 @@ int main() {
     glLinkProgram(shaderProgram);
     glUseProgram(shaderProgram);
 
+    // Create objects
     Object star0(shaderProgram, starData);
     Object star1(shaderProgram, starData);
     Object bush(shaderProgram, bushData);
+    createMoonData(); // Initialize moon data
+    Object moon(shaderProgram, moonData);
 
     bool lines = false;
     while (!glfwWindowShouldClose(window)) {
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // White background
-        glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // White background
+    glClear(GL_COLOR_BUFFER_BIT);
 
-        star0.Draw(lines);
-        star1.Draw(lines);
-        bush.Draw(lines);
+    // Draw objects
+    star0.Draw(lines);
+    star1.Draw(lines);
+    bush.Draw(lines);
+    moon.Draw(lines);  // Draw the moon
 
-        if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
-            lines = !lines;
-        if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-            star1.Move(0.0f, 0.01f);
-        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-            star1.Move(0.0f, -0.01f);
-        if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-            star1.Move(-0.01f, 0.0f);
-        if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-            star1.Move(0.01f, 0.0f);
+    // Toggle polygon mode
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
+        lines = !lines;
 
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            star0.Move(0.0f, 0.01f);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            star0.Move(0.0f, -0.01f);
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            star0.Move(-0.01f, 0.0f);
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            star0.Move(0.01f, 0.0f);
+    // Translation for stars
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+        star1.Move(0.0f, 0.01f);
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+        star1.Move(0.0f, -0.01f);
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        star1.Move(-0.01f, 0.0f);
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        star1.Move(0.01f, 0.0f);
 
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        star0.Move(0.0f, 0.01f);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        star0.Move(0.0f, -0.01f);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        star0.Move(-0.01f, 0.0f);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        star0.Move(0.01f, 0.0f);
 
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-            glfwSetWindowShouldClose(window, GL_TRUE);
+    // Translation for the moon
+    if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS)
+        moon.Move(0.0f, 0.01f);
+    if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS)
+        moon.Move(0.0f, -0.01f);
+
+    // Scaling for the moon
+    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+        moon.Scale(1.01f);  // Increase scale
+    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
+        moon.Scale(0.99f);  // Decrease scale
+
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, GL_TRUE);
     }
-
+    
     glDeleteProgram(shaderProgram);
     glDeleteShader(fragmentShader);
     glDeleteShader(vertexShader);

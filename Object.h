@@ -16,11 +16,12 @@ struct vData {
 struct Object {
     GLuint vao, vbo, ebo;
     GLuint shaderProgram;
-    GLfloat xPos, yPos;
+    GLfloat xPos, yPos, scale;  // Add scale
     vData data;
     Object(GLuint shaderProgram, vData data);
     void Draw(bool lines);
     void Move(float dx, float dy);
+    void Scale(float factor);   // Add Scale method
 };
 
 #endif // STAR_H

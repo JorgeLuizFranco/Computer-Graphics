@@ -4,7 +4,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-Object::Object(GLuint shaderProgram,vData data) : shaderProgram(shaderProgram), xPos(0.0f), yPos(0.0f), data(data) {
+Object::Object(GLuint shaderProgram, vData data) 
+    : shaderProgram(shaderProgram), xPos(0.0f), yPos(0.0f), scale(1.0f), data(data) {
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -31,19 +32,24 @@ Object::Object(GLuint shaderProgram,vData data) : shaderProgram(shaderProgram), 
 void Object::Draw(bool lines) {
     glBindVertexArray(vao);
 
-
     glm::mat4 id = glm::mat4(1.0f);
     glm::mat4 transform = glm::translate(id, glm::vec3(xPos, yPos, 0.0f));
+    transform = glm::scale(transform, glm::vec3(scale, scale, 1.0f));  // Apply scaling
 
     GLint uniTransform = glGetUniformLocation(shaderProgram, "transform");
     glUniformMatrix4fv(uniTransform, 1, GL_FALSE, glm::value_ptr(transform));
 
-    if (lines) glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+    if (lines) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    glDrawElements(GL_TRIANGLES, data.n_elements, GL_UNSIGNED_INT, 0);
 
+    glDrawElements(GL_TRIANGLES, data.n_elements, GL_UNSIGNED_INT, 0);
 }
+
+void Object::Scale(float factor) {
+    scale *= factor;
+}
+
 
 void Object::Move(float dx, float dy) {
     xPos += dx;
