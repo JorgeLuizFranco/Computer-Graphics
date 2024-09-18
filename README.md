@@ -6,3 +6,15 @@ Para rodar o programa:
 2. Compile o GLEW para sua máquina seguindo este [link](https://github.com/nigels-com/glew?tab=readme-ov-file#build)
 3. Após a compilação, mova **libGLEW.so, libGLEW.so.2.2, libGLEW.so.2.2.0** gerados na pasta lib/ para /usr/lib/
 4. Rode o Makefile e execute ./main
+
+Selecionando as teclas de 0..9 podemos selecionar algum dos objetos e utilizar transformações nele
+1. 0..1 -> Estrelas
+2. 2..4 -> Arbustos
+3. 5..7 -> Nuvens
+4. 8 -> Casa
+5. 9 -> Nave
+
+Comandos de transformação:
+1. Z,C Rotação
+2. J,K Escala
+3. W,A,S,D translação
