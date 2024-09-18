@@ -1,11 +1,18 @@
 #include "Object.h"
+#include <cstdio>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/vector_float3.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-Object::Object(GLuint shaderProgram, vData data) 
-    : shaderProgram(shaderProgram), xPos(0.0f), yPos(0.0f), scale(1.0f), data(data) {
+Object::Object(GLuint shaderProgram, vData data, float _xPos, float _yPos, float _zPos, float _scale) 
+    : shaderProgram(shaderProgram), angle(0.0f), data(data) {
+
+    xPos = _xPos;
+    yPos = _yPos;
+    zPos = _zPos;
+    scale = _scale;
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -22,24 +29,30 @@ Object::Object(GLuint shaderProgram, vData data)
 
     GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
     glEnableVertexAttribArray(posAttrib);
-    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
+    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
 
     GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
     glEnableVertexAttribArray(colAttrib);
-    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
-}
+    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 
-void Object::Draw(bool lines) {
+    }
+
+void Object::Draw(bool mesh_active, int axis) {
     glBindVertexArray(vao);
+    glUseProgram(shaderProgram);
 
-    glm::mat4 id = glm::mat4(1.0f);
-    glm::mat4 transform = glm::translate(id, glm::vec3(xPos, yPos, 0.0f));
-    transform = glm::scale(transform, glm::vec3(scale, scale, 1.0f));  // Apply scaling
+    glm::vec3 rotation_axis(0.0f, 1.0f, 0.0f);
+    if (axis == 0) rotation_axis = glm::vec3(1.0, 0.0f, 0.0f);
+    if (axis == 2) rotation_axis = glm::vec3(0.0, 0.0f, 1.0f);
 
+    glm::mat4 transform = glm::mat4(1.0f);
+    transform = glm::translate(transform, glm::vec3(xPos, yPos, zPos));
+    transform = glm::rotate(transform, angle, rotation_axis);
+    transform = glm::scale(transform, glm::vec3(scale, scale, scale));  // Apply scaling
     GLint uniTransform = glGetUniformLocation(shaderProgram, "transform");
     glUniformMatrix4fv(uniTransform, 1, GL_FALSE, glm::value_ptr(transform));
 
-    if (lines) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    if (mesh_active) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 
@@ -50,8 +63,10 @@ void Object::Scale(float factor) {
     scale *= factor;
 }
 
-
 void Object::Move(float dx, float dy) {
     xPos += dx;
     yPos += dy;
+}
+void Object::Rotate(float angle) {
+    this->angle += angle;
 }
