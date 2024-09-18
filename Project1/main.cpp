@@ -333,6 +333,10 @@ int main() {
             v->Draw(mesh_active);
         }
 
+        objs[0]->Rotate(0.7f);
+
+        objs[1]->Move(0.001f, -0.001f);
+
         for (auto key = GLFW_KEY_0; key  <= GLFW_KEY_9; key++) {
             if (glfwGetKey(window, key) == GLFW_PRESS) {
                 obj = objs[key-GLFW_KEY_0];
