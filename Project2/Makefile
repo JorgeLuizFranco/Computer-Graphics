@@ -1,15 +1,18 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra
-LDFLAGS = -lglfw -lGL -lGLEW -lGLU -lpthread -ldl -lassimp
+CXXFLAGS = -std=c++11 -Wall -g
+LIBS = -lGL -lGLEW -lglfw
+INCLUDES = -I/usr/include -I/usr/local/include
 
-CXXFILES = $(wildcard *.cpp)
-CXXOBJS = $(patsubst %.cpp, %.o, $(CXXFILES))
+all: main
 
-all: $(CXXOBJS)
-	$(CXX) $(CXXFLAGS) $(CXXOBJS) -o main $(LDFLAGS)
+main: main.o objloader.o
+	$(CXX) -o main main.o objloader.o $(LIBS)
 
-%.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $<
+main.o: main.cpp objloader.hpp
+	$(CXX) $(CXXFLAGS) -c main.cpp $(INCLUDES)
+
+objloader.o: objloader.cpp objloader.hpp
+	$(CXX) $(CXXFLAGS) -c objloader.cpp $(INCLUDES)
 
 clean:
 	rm -f *.o main
