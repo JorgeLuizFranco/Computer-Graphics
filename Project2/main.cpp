@@ -7,7 +7,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "objloader.hpp"
+#include "objloader.hpp"  // Include your obj loader header
 
 // Shader source for simplicity
 const char* vertexShaderSource = R"(
@@ -113,29 +113,48 @@ int main() {
     glGenVertexArrays(1, &VertexArrayID);
     glBindVertexArray(VertexArrayID);
 
-    std::vector<glm::vec3> vertices;
-    std::vector<glm::vec2> uvs;
-    std::vector<glm::vec3> normals;
-
-    bool res = loadOBJ("fat-batman/source/untitled.obj", vertices, uvs, normals);
-    if (!res) {
-        std::cerr << "Failed to load OBJ file\n";
+    // Load first object
+    std::vector<glm::vec3> vertices1, normals1;
+    std::vector<glm::vec2> uvs1;
+    bool res1 = loadOBJ("fat-batman/source/untitled.obj", vertices1, uvs1, normals1);
+    if (!res1) {
+        std::cerr << "Failed to load first OBJ file\n";
         return -1;
     }
 
-    GLuint vertexBuffer, uvBuffer;
-    glGenBuffers(1, &vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+    GLuint vertexBuffer1, uvBuffer1;
+    glGenBuffers(1, &vertexBuffer1);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer1);
+    glBufferData(GL_ARRAY_BUFFER, vertices1.size() * sizeof(glm::vec3), &vertices1[0], GL_STATIC_DRAW);
 
-    glGenBuffers(1, &uvBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-    glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+    glGenBuffers(1, &uvBuffer1);
+    glBindBuffer(GL_ARRAY_BUFFER, uvBuffer1);
+    glBufferData(GL_ARRAY_BUFFER, uvs1.size() * sizeof(glm::vec2), &uvs1[0], GL_STATIC_DRAW);
+
+    // Load second object
+    std::vector<glm::vec3> vertices2, normals2;
+    std::vector<glm::vec2> uvs2;
+    bool res2 = loadOBJ("wolverine/wolwerine.obj", vertices2, uvs2, normals2);  // Update the path accordingly
+    if (!res2) {
+        std::cerr << "Failed to load second OBJ file\n";
+        return -1;
+    }
+
+    GLuint vertexBuffer2, uvBuffer2;
+    glGenBuffers(1, &vertexBuffer2);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer2);
+    glBufferData(GL_ARRAY_BUFFER, vertices2.size() * sizeof(glm::vec3), &vertices2[0], GL_STATIC_DRAW);
+
+    glGenBuffers(1, &uvBuffer2);
+    glBindBuffer(GL_ARRAY_BUFFER, uvBuffer2);
+    glBufferData(GL_ARRAY_BUFFER, uvs2.size() * sizeof(glm::vec2), &uvs2[0], GL_STATIC_DRAW);
 
     GLuint shaderProgram = loadShaders(vertexShaderSource, fragmentShaderSource);
     glUseProgram(shaderProgram);
 
-    GLuint texture = loadTexture("fat-batman/textures/Fatman_Batman_BaseColor.png");
+    GLuint texture1 = loadTexture("fat-batman/textures/Fatman_Batman_BaseColor.png");
+    GLuint texture2 = loadTexture("wolverine/wolwerine.png");  // Load texture for the second object
+
     glUniform1i(glGetUniformLocation(shaderProgram, "myTextureSampler"), 0);
 
     // Camera setup
@@ -150,25 +169,45 @@ int main() {
 
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        glm::mat4 model = glm::mat4(1.0f);
-        glm::mat4 MVP = projection * view * model;
-
-        glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, &MVP[0][0]);
+        glm::mat4 model1 = glm::mat4(1.0f);  // Model matrix for the first object
+        glm::mat4 model2 = glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, 0.0f)); // Translate second object to the side
+        glm::mat4 MVP1 = projection * view * model1;
+        glm::mat4 MVP2 = projection * view * model2;
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // Render first object
+        glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, &MVP1[0][0]);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindTexture(GL_TEXTURE_2D, texture1);
 
         glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer1);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
         glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, uvBuffer1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-        glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+        glDrawArrays(GL_TRIANGLES, 0, vertices1.size());
+
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
+
+        // Render second object
+        glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, &MVP2[0][0]);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture2);
+
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer2);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, uvBuffer2);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+        glDrawArrays(GL_TRIANGLES, 0, vertices2.size());
 
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
@@ -177,8 +216,11 @@ int main() {
         glfwPollEvents();
     }
 
-    glDeleteBuffers(1, &vertexBuffer);
-    glDeleteBuffers(1, &uvBuffer);
+    // Cleanup
+    glDeleteBuffers(1, &vertexBuffer1);
+    glDeleteBuffers(1, &uvBuffer1);
+    glDeleteBuffers(1, &vertexBuffer2);
+    glDeleteBuffers(1, &uvBuffer2);
     glDeleteVertexArrays(1, &VertexArrayID);
     glDeleteProgram(shaderProgram);
 
