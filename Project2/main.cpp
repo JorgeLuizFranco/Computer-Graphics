@@ -134,7 +134,7 @@ int main() {
     // Load second object
     std::vector<glm::vec3> vertices2, normals2;
     std::vector<glm::vec2> uvs2;
-    bool res2 = loadOBJ("wolverine/wolwerine.obj", vertices2, uvs2, normals2);  // Update the path accordingly
+    bool res2 = loadOBJ("IronMan/IronMan.obj", vertices2, uvs2, normals2);  // Update the path accordingly
     if (!res2) {
         std::cerr << "Failed to load second OBJ file\n";
         return -1;
@@ -153,7 +153,7 @@ int main() {
     glUseProgram(shaderProgram);
 
     GLuint texture1 = loadTexture("fat-batman/textures/Fatman_Batman_BaseColor.png");
-    GLuint texture2 = loadTexture("wolverine/wolwerine.png");  // Load texture for the second object
+    //GLuint texture2 = loadTexture("wolverine/wolwerine.png");  // Load texture for the second object
 
     glUniform1i(glGetUniformLocation(shaderProgram, "myTextureSampler"), 0);
 
@@ -196,8 +196,8 @@ int main() {
 
         // Render second object
         glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, &MVP2[0][0]);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture2);
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, texture2);
 
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer2);

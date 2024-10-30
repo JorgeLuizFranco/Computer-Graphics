@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS = -std=c++11 -Wall -g
-LIBS = -lGL -lGLEW -lglfw
+LIBS = -lGL -lGLEW -lglfw -lassimp
 INCLUDES = -I/usr/include -I/usr/local/include
 
 all: main
